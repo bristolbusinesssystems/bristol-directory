@@ -4,6 +4,15 @@
     <div class="claim-hero-inner">
       <div class="claim-copy">
         <div class="dir-hero-tag mb-3"><i class="bi bi-geo-alt-fill me-1"></i>Bristol, Vermont</div>
+        <% if (listing) { %>
+          <div style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:10px;padding:12px 16px;margin-bottom:16px;display:inline-flex;align-items:center;gap:10px">
+            <i class="bi bi-building-fill" style="color:#7aba82;font-size:18px"></i>
+            <div>
+              <div style="font-size:11px;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.06em">Claiming listing for</div>
+              <div style="color:#fff;font-weight:700;font-size:15px"><%= listing.name %></div>
+            </div>
+          </div>
+        <% } %>
         <h1 class="claim-h1">Grow Your Bristol<br>Business</h1>
         <p class="claim-sub">Get found by locals, manage your customers, and grow with tools built for small businesses — all in one place.</p>
         <a href="<%= crmSignupUrl %>" class="dir-btn-primary dir-btn-lg">Get Started Free</a>

@@ -191,6 +191,9 @@ img { max-width: 100%; display: block; }
 
 /* ===== FOOTER ===== */
 .dir-footer { background: var(--green-dark); color: rgba(255,255,255,0.8); padding: 56px 0 24px; margin-top: 0; }
+.dir-footer .text-muted { color: rgba(255,255,255,0.6) !important; }
+.dir-footer a { color: rgba(255,255,255,0.6); }
+.dir-footer a:hover { color: #fff; }
 .dir-footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 40px; margin-bottom: 40px; }
 .dir-footer-grid .dir-logo-name { color: #fff; font-size: 16px; }
 .dir-footer-heading { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.5); margin-bottom: 14px; }

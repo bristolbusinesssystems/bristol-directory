@@ -71,7 +71,7 @@ img { max-width: 100%; display: block; }
 }
 .dir-hero-overlay {
   position: absolute; inset: 0;
-  background: linear-gradient(160deg, rgba(15,40,18,0.82) 0%, rgba(26,61,32,0.70) 60%, rgba(45,106,53,0.55) 100%);
+  background: linear-gradient(160deg, rgba(15,40,18,0.62) 0%, rgba(26,61,32,0.50) 60%, rgba(45,106,53,0.35) 100%);
 }
 .dir-hero-content { position: relative; z-index: 2; padding: 80px 0 100px; }
 .dir-hero-tag {

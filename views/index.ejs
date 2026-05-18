@@ -1,0 +1,95 @@
+<!-- Hero -->
+<section class="dir-hero">
+  <div class="dir-hero-overlay"></div>
+  <div class="dir-container dir-hero-content">
+    <div class="dir-hero-tag"><i class="bi bi-geo-alt-fill me-1"></i>Bristol, Vermont</div>
+    <h1 class="dir-hero-h1">Discover Bristol's<br>Best Local Businesses</h1>
+    <p class="dir-hero-sub">Your community guide to shops, restaurants, services and everything Bristol, Vermont has to offer.</p>
+
+    <!-- Search bar -->
+    <form action="/search" method="GET" class="dir-search-form">
+      <div class="dir-search-bar">
+        <div class="dir-search-input-wrap">
+          <i class="bi bi-search dir-search-icon"></i>
+          <input type="text" name="q" class="dir-search-input" placeholder="Search businesses, services...">
+        </div>
+        <select name="category" class="dir-search-select">
+          <option value="">All Categories</option>
+          <% categories.forEach(c => { %>
+            <option value="<%= c.slug %>"><%= c.name %></option>
+          <% }) %>
+        </select>
+        <button type="submit" class="dir-search-btn">Search</button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- Categories -->
+<section class="dir-section">
+  <div class="dir-container">
+    <div class="dir-section-header">
+      <h2 class="dir-section-title">Browse by Category</h2>
+      <a href="/search" class="dir-section-link">View all <i class="bi bi-arrow-right"></i></a>
+    </div>
+    <div class="dir-categories-grid">
+      <% categories.forEach(cat => { %>
+        <a href="/category/<%= cat.slug %>" class="dir-cat-card">
+          <div class="dir-cat-icon"><i class="bi bi-<%= cat.icon %>"></i></div>
+          <div class="dir-cat-name"><%= cat.name %></div>
+          <div class="dir-cat-count"><%= cat.count %> listing<%= cat.count != 1 ? 's' : '' %></div>
+        </a>
+      <% }) %>
+    </div>
+  </div>
+</section>
+
+<!-- Featured Listings -->
+<% if (featured.length > 0) { %>
+<section class="dir-section dir-section-alt">
+  <div class="dir-container">
+    <div class="dir-section-header">
+      <h2 class="dir-section-title"><i class="bi bi-star-fill text-warning me-2"></i>Featured Businesses</h2>
+    </div>
+    <div class="dir-listings-grid">
+      <% featured.forEach(listing => { %>
+        <%- include('partials/listing-card', { listing, featured: true }) %>
+      <% }) %>
+    </div>
+  </div>
+</section>
+<% } %>
+
+<!-- Recent Listings -->
+<section class="dir-section">
+  <div class="dir-container">
+    <div class="dir-section-header">
+      <h2 class="dir-section-title">Bristol Businesses</h2>
+      <a href="/search" class="dir-section-link">See all <i class="bi bi-arrow-right"></i></a>
+    </div>
+    <% if (recent.length === 0) { %>
+      <div class="dir-empty">
+        <i class="bi bi-building fs-2 d-block mb-2"></i>
+        <p>Businesses are being added — check back soon.</p>
+        <a href="/claim" class="dir-btn-primary mt-2">Add Your Business</a>
+      </div>
+    <% } else { %>
+      <div class="dir-listings-grid">
+        <% recent.forEach(listing => { %>
+          <%- include('partials/listing-card', { listing, featured: false }) %>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+</section>
+
+<!-- CTA Banner -->
+<section class="dir-cta-banner">
+  <div class="dir-container dir-cta-inner">
+    <div>
+      <h2 class="dir-cta-title">Is your business listed?</h2>
+      <p class="dir-cta-sub">Join hundreds of Bristol Vermont businesses. Free listing included — upgrade anytime to unlock your full CRM.</p>
+    </div>
+    <a href="/claim" class="dir-btn-primary dir-btn-lg">Get Listed Free</a>
+  </div>
+</section>

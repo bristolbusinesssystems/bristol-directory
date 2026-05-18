@@ -1,0 +1,42 @@
+<div class="dir-page-header">
+  <div class="dir-container">
+    <h1 class="dir-page-title"><% if (q) { %>Results for "<%= q %>"<% } else { %>Browse All Businesses<% } %></h1>
+    <p class="dir-page-sub"><%= listings.length %> business<%= listings.length !== 1 ? 'es' : '' %> found in Bristol, Vermont</p>
+  </div>
+</div>
+
+<div class="dir-filter-bar">
+  <div class="dir-container">
+    <form action="/search" method="GET">
+      <div class="dir-filter-inner">
+        <input type="text" name="q" class="dir-filter-input" value="<%= q %>" placeholder="Search businesses...">
+        <select name="category" class="dir-filter-select">
+          <option value="">All Categories</option>
+          <% categories.forEach(c => { %>
+            <option value="<%= c.slug %>" <%= category === c.slug ? 'selected' : '' %>><%= c.name %></option>
+          <% }) %>
+        </select>
+        <button type="submit" class="dir-filter-btn">Search</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<section class="dir-section">
+  <div class="dir-container">
+    <% if (listings.length === 0) { %>
+      <div class="dir-empty">
+        <i class="bi bi-search fs-2 d-block mb-3"></i>
+        <h3>No businesses found</h3>
+        <p>Try a different search term or browse all categories.</p>
+        <a href="/search" class="dir-btn-primary mt-3">Browse All</a>
+      </div>
+    <% } else { %>
+      <div class="dir-listings-grid">
+        <% listings.forEach(listing => { %>
+          <%- include('partials/listing-card', { listing, featured: false }) %>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+</section>

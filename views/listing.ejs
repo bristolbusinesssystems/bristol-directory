@@ -1,0 +1,71 @@
+<% if (listing.hero_image) { %>
+  <img src="<%= listing.hero_image %>" alt="<%= listing.name %>" class="dir-listing-hero">
+<% } else { %>
+  <div class="dir-listing-hero-placeholder"><i class="bi bi-building"></i></div>
+<% } %>
+
+<section class="dir-section">
+  <div class="dir-container">
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <!-- Header -->
+        <div class="mb-4">
+          <% if (listing.category_name) { %>
+            <a href="/category/<%= listing.category_slug %>" class="dir-listing-cat d-inline-block mb-2"><%= listing.category_name %></a>
+          <% } %>
+          <h1 class="dir-page-title" style="color:var(--text)"><%= listing.name %></h1>
+          <div class="d-flex gap-3 mt-2 flex-wrap">
+            <% if (listing.is_verified) { %><span class="badge bg-success"><i class="bi bi-patch-check-fill me-1"></i>Verified</span><% } %>
+            <% if (listing.is_featured) { %><span class="badge" style="background:var(--amber)"><i class="bi bi-star-fill me-1"></i>Featured</span><% } %>
+          </div>
+        </div>
+
+        <% if (listing.description) { %>
+          <div class="dir-detail-card">
+            <div class="dir-detail-label">About</div>
+            <p style="margin:0;line-height:1.7"><%= listing.description %></p>
+          </div>
+        <% } else if (listing.short_description) { %>
+          <div class="dir-detail-card">
+            <p style="margin:0;line-height:1.7"><%= listing.short_description %></p>
+          </div>
+        <% } %>
+
+        <% if (!listing.is_paid) { %>
+          <div class="dir-detail-card" style="border-color:var(--green);background:var(--green-soft)">
+            <h5 style="color:var(--green);margin-bottom:8px"><i class="bi bi-star-fill me-2"></i>Is this your business?</h5>
+            <p style="margin-bottom:12px;color:var(--text-soft)">Claim this listing to add photos, description, opening hours and get full CRM access.</p>
+            <a href="/claim" class="dir-btn-primary">Claim Your Listing</a>
+          </div>
+        <% } %>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="dir-detail-card">
+          <% if (listing.phone) { %>
+            <div class="mb-3">
+              <div class="dir-detail-label">Phone</div>
+              <a href="tel:<%= listing.phone %>" style="color:var(--green);font-weight:600"><i class="bi bi-telephone me-1"></i><%= listing.phone %></a>
+            </div>
+          <% } %>
+          <% if (listing.website) { %>
+            <div class="mb-3">
+              <div class="dir-detail-label">Website</div>
+              <a href="https://<%= listing.website.replace('https://','').replace('http://','') %>" target="_blank" style="color:var(--green);font-weight:600"><i class="bi bi-globe me-1"></i><%= listing.website %></a>
+            </div>
+          <% } %>
+          <% if (listing.email) { %>
+            <div class="mb-3">
+              <div class="dir-detail-label">Email</div>
+              <a href="mailto:<%= listing.email %>" style="color:var(--green);font-weight:600"><i class="bi bi-envelope me-1"></i><%= listing.email %></a>
+            </div>
+          <% } %>
+          <div class="mb-0">
+            <div class="dir-detail-label">Location</div>
+            <span><i class="bi bi-geo-alt me-1 text-muted"></i><%= listing.address ? listing.address + ', ' : '' %><%= listing.city %>, <%= listing.state %> <%= listing.zip %></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

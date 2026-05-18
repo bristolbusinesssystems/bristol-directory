@@ -1,0 +1,25 @@
+<div class="dir-page-header">
+  <div class="dir-container">
+    <h1 class="dir-page-title"><i class="bi bi-<%= category.icon %> me-2"></i><%= category.name %></h1>
+    <p class="dir-page-sub"><%= listings.length %> business<%= listings.length !== 1 ? 'es' : '' %> in Bristol, Vermont</p>
+  </div>
+</div>
+
+<section class="dir-section">
+  <div class="dir-container">
+    <% if (listings.length === 0) { %>
+      <div class="dir-empty">
+        <i class="bi bi-building fs-2 d-block mb-3"></i>
+        <h3>No listings yet in this category</h3>
+        <p>Be the first to list your business here.</p>
+        <a href="/claim" class="dir-btn-primary mt-3">Add Your Business</a>
+      </div>
+    <% } else { %>
+      <div class="dir-listings-grid">
+        <% listings.forEach(listing => { %>
+          <%- include('partials/listing-card', { listing, featured: false }) %>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+</section>

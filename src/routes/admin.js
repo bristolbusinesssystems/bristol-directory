@@ -1,7 +1,34 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
 const db = require('../db/index');
 const { requireAdmin } = require('../middleware/adminAuth');
+
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
+
+function parseCSV(text) {
+  const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+  const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/\s+/g, '_').replace(/[^a-z_]/g, ''));
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+    // Handle quoted fields
+    const values = [];
+    let current = '';
+    let inQuotes = false;
+    for (const char of line) {
+      if (char === '"') { inQuotes = !inQuotes; }
+      else if (char === ',' && !inQuotes) { values.push(current.trim()); current = ''; }
+      else { current += char; }
+    }
+    values.push(current.trim());
+    const row = {};
+    headers.forEach((h, idx) => { row[h] = values[idx] || ''; });
+    rows.push(row);
+  }
+  return rows;
+}
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
 
@@ -85,6 +112,54 @@ router.post('/delete/:id', requireAdmin, async (req, res, next) => {
   try {
     await db.query('DELETE FROM listings WHERE id = $1', [req.params.id]);
     res.redirect('/admin');
+  } catch (err) { next(err); }
+});
+
+// CSV Import — download template
+router.get('/import/template', requireAdmin, (req, res) => {
+  const csv = 'name,category,short_description,phone,email,website,address,city,state,zip\nSimplyKeeping,home-services,Professional cleaning services for homes and businesses.,802-555-0100,info@simplykeeping.com,simplykeeping.com,123 Main St,Bristol,VT,05443\n';
+  res.setHeader('Content-Type', 'text/csv');
+  res.setHeader('Content-Disposition', 'attachment; filename="listings-template.csv"');
+  res.send(csv);
+});
+
+// CSV Import — upload form
+router.get('/import', requireAdmin, async (req, res, next) => {
+  try {
+    const { rows: categories } = await db.query('SELECT * FROM categories ORDER BY sort_order');
+    res.render('admin/import', { title: 'Import Listings', layout: 'admin/layout', categories, results: null, error: null });
+  } catch (err) { next(err); }
+});
+
+// CSV Import — process
+router.post('/import', requireAdmin, upload.single('csvfile'), async (req, res, next) => {
+  try {
+    if (!req.file) return res.render('admin/import', { title: 'Import Listings', layout: 'admin/layout', categories: [], results: null, error: 'Please select a CSV file.' });
+
+    const { rows: categories } = await db.query('SELECT * FROM categories ORDER BY sort_order');
+    const catMap = {};
+    categories.forEach(c => { catMap[c.slug] = c.id; catMap[c.name.toLowerCase()] = c.id; });
+
+    const text = req.file.buffer.toString('utf8');
+    const rows = parseCSV(text);
+
+    let imported = 0, skipped = 0, errors = [];
+
+    for (const row of rows) {
+      if (!row.name || !row.name.trim()) { skipped++; continue; }
+      try {
+        const slug = row.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now() + '-' + Math.floor(Math.random()*1000);
+        const catId = catMap[row.category?.toLowerCase()] || null;
+        await db.query(`
+          INSERT INTO listings (name, slug, category_id, short_description, phone, email, website, address, city, state, zip, status)
+          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,'active')
+          ON CONFLICT (slug) DO NOTHING
+        `, [row.name.trim(), slug, catId, row.short_description || null, row.phone || null, row.email || null, row.website || null, row.address || null, row.city || 'Bristol', row.state || 'VT', row.zip || '05443']);
+        imported++;
+      } catch (e) { errors.push(`${row.name}: ${e.message}`); }
+    }
+
+    res.render('admin/import', { title: 'Import Listings', layout: 'admin/layout', categories, results: { imported, skipped, errors }, error: null });
   } catch (err) { next(err); }
 });
 

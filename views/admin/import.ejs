@@ -1,0 +1,80 @@
+<div class="d-flex align-items-center gap-3 mb-4">
+  <a href="/admin" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i></a>
+  <h1 style="font-size:20px;font-weight:700;margin:0">Import Listings from CSV</h1>
+</div>
+
+<% if (results) { %>
+  <div class="alert <%= results.errors.length > 0 ? 'alert-warning' : 'alert-success' %> mb-4">
+    <i class="bi bi-check-circle me-2"></i>
+    <strong><%= results.imported %> listing<%= results.imported !== 1 ? 's' : '' %> imported</strong>
+    <% if (results.skipped > 0) { %> &bull; <%= results.skipped %> skipped (empty rows)<% } %>
+    <% if (results.errors.length > 0) { %>
+      <ul class="mb-0 mt-2">
+        <% results.errors.forEach(e => { %><li class="small"><%= e %></li><% }) %>
+      </ul>
+    <% } %>
+  </div>
+<% } %>
+
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="admin-card">
+      <div class="admin-card-header"><h5 class="admin-card-title">Upload CSV File</h5></div>
+      <div class="p-4">
+        <% if (error) { %>
+          <div class="alert alert-danger py-2 small mb-3"><%= error %></div>
+        <% } %>
+        <form method="POST" action="/admin/import" enctype="multipart/form-data">
+          <div class="mb-4">
+            <label class="form-label fw-semibold small">Select CSV File</label>
+            <input type="file" name="csvfile" class="form-control" accept=".csv" required>
+            <div class="text-muted small mt-1">Max 5MB. Must match the template format below.</div>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn" style="background:#1a3d20;color:#fff;font-weight:600">
+              <i class="bi bi-upload me-1"></i>Import Listings
+            </button>
+            <a href="/admin" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <h5 class="admin-card-title">CSV Format</h5>
+        <a href="/admin/import/template" class="btn btn-sm btn-outline-secondary">
+          <i class="bi bi-download me-1"></i>Download Template
+        </a>
+      </div>
+      <div class="p-4">
+        <p class="small text-muted mb-3">Your CSV must have these column headers in the first row:</p>
+        <table class="table table-sm table-bordered" style="font-size:12px">
+          <thead style="background:#f8f9fa">
+            <tr><th>Column</th><th>Required</th><th>Example</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>name</code></td><td>✅ Yes</td><td>SimplyKeeping</td></tr>
+            <tr><td><code>category</code></td><td>No</td><td>home-services</td></tr>
+            <tr><td><code>short_description</code></td><td>No</td><td>Cleaning services</td></tr>
+            <tr><td><code>phone</code></td><td>No</td><td>802-555-0100</td></tr>
+            <tr><td><code>email</code></td><td>No</td><td>info@business.com</td></tr>
+            <tr><td><code>website</code></td><td>No</td><td>example.com</td></tr>
+            <tr><td><code>address</code></td><td>No</td><td>123 Main St</td></tr>
+            <tr><td><code>city</code></td><td>No</td><td>Bristol</td></tr>
+            <tr><td><code>state</code></td><td>No</td><td>VT</td></tr>
+            <tr><td><code>zip</code></td><td>No</td><td>05443</td></tr>
+          </tbody>
+        </table>
+        <p class="small text-muted mb-2"><strong>Category slugs:</strong></p>
+        <div style="font-size:11px;column-count:2;gap:8px">
+          <% categories.forEach(c => { %>
+            <div class="mb-1"><code><%= c.slug %></code></div>
+          <% }) %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

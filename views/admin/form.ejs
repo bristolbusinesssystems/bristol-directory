@@ -1,0 +1,124 @@
+<div class="d-flex align-items-center gap-3 mb-4">
+  <a href="/admin" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i></a>
+  <h1 style="font-size:20px;font-weight:700;margin:0"><%= listing ? 'Edit: ' + listing.name : 'Add New Business' %></h1>
+</div>
+
+<% if (error) { %>
+  <div class="alert alert-danger mb-4"><%= error %></div>
+<% } %>
+
+<form method="POST" action="/admin/<%= listing ? 'edit/' + listing.id : 'new' %>">
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="admin-card mb-4">
+        <div class="admin-card-header"><h5 class="admin-card-title">Business Details</h5></div>
+        <div class="p-4">
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label fw-semibold small">Business Name <span class="text-danger">*</span></label>
+              <input type="text" name="name" class="form-control" required value="<%= listing ? listing.name : '' %>">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold small">Category</label>
+              <select name="category_id" class="form-select">
+                <option value="">— Select —</option>
+                <% categories.forEach(c => { %>
+                  <option value="<%= c.id %>" <%= listing && listing.category_id == c.id ? 'selected' : '' %>><%= c.name %></option>
+                <% }) %>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold small">Status</label>
+              <select name="status" class="form-select">
+                <option value="active" <%= !listing || listing.status === 'active' ? 'selected' : '' %>>Active</option>
+                <option value="inactive" <%= listing && listing.status === 'inactive' ? 'selected' : '' %>>Inactive</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold small">Short Description <span class="text-muted">(shown on cards)</span></label>
+              <input type="text" name="short_description" class="form-control" maxlength="255" value="<%= listing ? listing.short_description || '' : '' %>">
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold small">Full Description <span class="text-muted">(shown on listing page — paid only)</span></label>
+              <textarea name="description" class="form-control" rows="4"><%= listing ? listing.description || '' : '' %></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-card mb-4">
+        <div class="admin-card-header"><h5 class="admin-card-title">Contact & Location</h5></div>
+        <div class="p-4">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold small">Phone</label>
+              <input type="text" name="phone" class="form-control" value="<%= listing ? listing.phone || '' : '' %>">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold small">Email</label>
+              <input type="email" name="email" class="form-control" value="<%= listing ? listing.email || '' : '' %>">
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold small">Website</label>
+              <input type="text" name="website" class="form-control" placeholder="e.g. simplykeeping.com" value="<%= listing ? listing.website || '' : '' %>">
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold small">Address</label>
+              <input type="text" name="address" class="form-control" value="<%= listing ? listing.address || '' : '' %>">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold small">City</label>
+              <input type="text" name="city" class="form-control" value="<%= listing ? listing.city || 'Bristol' : 'Bristol' %>">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold small">State</label>
+              <input type="text" name="state" class="form-control" value="<%= listing ? listing.state || 'VT' : 'VT' %>">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold small">ZIP</label>
+              <input type="text" name="zip" class="form-control" value="<%= listing ? listing.zip || '05443' : '05443' %>">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold small">Facebook URL</label>
+              <input type="text" name="facebook" class="form-control" value="<%= listing ? listing.facebook || '' : '' %>">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold small">Instagram URL</label>
+              <input type="text" name="instagram" class="form-control" value="<%= listing ? listing.instagram || '' : '' %>">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="admin-card mb-4">
+        <div class="admin-card-header"><h5 class="admin-card-title">Listing Flags</h5></div>
+        <div class="p-4">
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" name="is_paid" id="isPaid" <%= listing && listing.is_paid ? 'checked' : '' %>>
+            <label class="form-check-label fw-semibold" for="isPaid">Paid Subscriber</label>
+            <div class="text-muted small">Shows full description, photos, hours</div>
+          </div>
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" name="is_featured" id="isFeatured" <%= listing && listing.is_featured ? 'checked' : '' %>>
+            <label class="form-check-label fw-semibold" for="isFeatured">Featured</label>
+            <div class="text-muted small">Appears in Featured section on homepage</div>
+          </div>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" name="is_verified" id="isVerified" <%= listing && listing.is_verified ? 'checked' : '' %>>
+            <label class="form-check-label fw-semibold" for="isVerified">Verified</label>
+            <div class="text-muted small">Shows verified badge on listing</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-grid gap-2">
+        <button type="submit" class="btn" style="background:#1a3d20;color:#fff;font-weight:600">
+          <i class="bi bi-check-lg me-1"></i><%= listing ? 'Save Changes' : 'Create Listing' %>
+        </button>
+        <a href="/admin" class="btn btn-outline-secondary">Cancel</a>
+      </div>
+    </div>
+  </div>
+</form>

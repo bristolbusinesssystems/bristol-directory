@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const expressLayouts = require('express-ejs-layouts');
+const session = require('express-session');
 const path = require('path');
 const fs = require('fs');
 const { query } = require('./db/index');
@@ -17,8 +18,15 @@ app.set('layout', 'layout');
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '..', 'public')));
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'bdd-dev-secret',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { maxAge: 24 * 60 * 60 * 1000 }
+}));
 
 // Routes
+app.use('/admin', require('./routes/admin'));
 app.use('/', require('./routes/index'));
 app.use('/listing', require('./routes/listings'));
 app.use('/category', require('./routes/categories'));

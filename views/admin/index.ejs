@@ -1,0 +1,68 @@
+<% if (saved) { %>
+  <div class="alert alert-success mb-4"><i class="bi bi-check-circle me-2"></i>Saved successfully.</div>
+<% } %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 style="font-size:22px;font-weight:700;margin:0">Listings</h1>
+    <p class="text-muted small mb-0"><%= listings.length %> businesses in directory</p>
+  </div>
+  <a href="/admin/new" class="btn" style="background:#1a3d20;color:#fff;font-weight:600"><i class="bi bi-plus-lg me-1"></i>Add Business</a>
+</div>
+
+<div class="admin-card">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead style="background:#f8f9fa">
+        <tr>
+          <th style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em">Business</th>
+          <th style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em">Category</th>
+          <th style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em">Status</th>
+          <th style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em">Flags</th>
+          <th style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (listings.length === 0) { %>
+          <tr><td colspan="5" class="text-center text-muted py-4">No listings yet. <a href="/admin/new">Add your first business.</a></td></tr>
+        <% } %>
+        <% listings.forEach(l => { %>
+          <tr>
+            <td>
+              <div class="fw-semibold"><%= l.name %></div>
+              <div class="text-muted small"><%= l.city %>, VT</div>
+            </td>
+            <td class="text-muted small"><%= l.category_name || '—' %></td>
+            <td>
+              <span class="badge <%= l.status === 'active' ? 'bg-success' : 'bg-secondary' %>"><%= l.status %></span>
+            </td>
+            <td>
+              <form method="POST" action="/admin/toggle/<%= l.id %>/is_paid" class="d-inline">
+                <button class="badge border-0 <%= l.is_paid ? 'badge-paid' : 'badge-free' %>" title="Toggle paid">
+                  <%= l.is_paid ? 'Paid' : 'Free' %>
+                </button>
+              </form>
+              <form method="POST" action="/admin/toggle/<%= l.id %>/is_featured" class="d-inline">
+                <button class="badge border-0 <%= l.is_featured ? 'bg-warning text-dark' : 'badge-free' %>" title="Toggle featured">
+                  <i class="bi bi-star<%= l.is_featured ? '-fill' : '' %>"></i>
+                </button>
+              </form>
+              <form method="POST" action="/admin/toggle/<%= l.id %>/is_verified" class="d-inline">
+                <button class="badge border-0 <%= l.is_verified ? 'bg-primary' : 'badge-free' %>" title="Toggle verified">
+                  <i class="bi bi-patch-check<%= l.is_verified ? '-fill' : '' %>"></i>
+                </button>
+              </form>
+            </td>
+            <td class="text-end">
+              <a href="/listing/<%= l.slug %>" target="_blank" class="btn btn-sm btn-outline-secondary me-1"><i class="bi bi-eye"></i></a>
+              <a href="/admin/edit/<%= l.id %>" class="btn btn-sm btn-outline-primary me-1"><i class="bi bi-pencil"></i></a>
+              <form method="POST" action="/admin/delete/<%= l.id %>" class="d-inline" onsubmit="return confirm('Delete <%= l.name %>?')">
+                <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>

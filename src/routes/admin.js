@@ -74,11 +74,23 @@ router.post('/new', requireAdmin, async (req, res, next) => {
   try {
     const { name, category_id, short_description, description, address, city, state, zip, phone, email, website, facebook, instagram, is_paid, is_featured, is_verified, status } = req.body;
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now();
-    await db.query(`
+    const result = await db.query(`
       INSERT INTO listings (name, slug, category_id, short_description, description, address, city, state, zip, phone, email, website, facebook, instagram, is_paid, is_featured, is_verified, status)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) RETURNING id
     `, [name, slug, category_id || null, short_description, description, address, city || 'Bristol', state || 'VT', zip || '05443', phone, email, website, facebook, instagram,
         is_paid === 'on', is_featured === 'on', is_verified === 'on', status || 'active']);
+
+    // Fire N8N outreach webhook if listing has an email
+    if (email && process.env.N8N_LISTING_WEBHOOK_URL) {
+      try {
+        const https = require('https');
+        const payload = JSON.stringify({ name, email, listing_id: result.rows[0].id });
+        const url = new URL(process.env.N8N_LISTING_WEBHOOK_URL);
+        const reqN = https.request({ hostname: url.hostname, path: url.pathname, method: 'POST', headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) } });
+        reqN.write(payload);
+        reqN.end();
+      } catch (_) {}
+    }
     res.redirect('/admin?saved=1');
   } catch (err) { next(err); }
 });

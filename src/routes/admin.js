@@ -82,14 +82,11 @@ router.post('/new', requireAdmin, async (req, res, next) => {
 
     // Fire N8N outreach webhook if listing has an email
     if (email && process.env.N8N_LISTING_WEBHOOK_URL) {
-      try {
-        const https = require('https');
-        const payload = JSON.stringify({ name, email, listing_id: result.rows[0].id });
-        const url = new URL(process.env.N8N_LISTING_WEBHOOK_URL);
-        const reqN = https.request({ hostname: url.hostname, path: url.pathname, method: 'POST', headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) } });
-        reqN.write(payload);
-        reqN.end();
-      } catch (_) {}
+      fetch(process.env.N8N_LISTING_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, listing_id: result.rows[0].id })
+      }).catch(() => {});
     }
     res.redirect('/admin?saved=1');
   } catch (err) { next(err); }

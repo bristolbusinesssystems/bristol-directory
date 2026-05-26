@@ -3,6 +3,19 @@ const router = express.Router();
 const multer = require('multer');
 const db = require('../db/index');
 const { requireAdmin } = require('../middleware/adminAuth');
+const { DAYS } = require('../utils/hours');
+
+function parseHours(body) {
+  const hours = {};
+  DAYS.forEach(day => {
+    hours[day] = {
+      open: body[`hours_${day}_open`] || null,
+      close: body[`hours_${day}_close`] || null,
+      closed: body[`hours_${day}_closed`] === 'on'
+    };
+  });
+  return hours;
+}
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
 
@@ -74,11 +87,12 @@ router.post('/new', requireAdmin, async (req, res, next) => {
   try {
     const { name, category_id, short_description, description, address, city, state, zip, phone, email, website, facebook, instagram, is_paid, is_featured, is_verified, status } = req.body;
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now();
+    const hours = parseHours(req.body);
     const result = await db.query(`
-      INSERT INTO listings (name, slug, category_id, short_description, description, address, city, state, zip, phone, email, website, facebook, instagram, is_paid, is_featured, is_verified, status)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) RETURNING id
+      INSERT INTO listings (name, slug, category_id, short_description, description, address, city, state, zip, phone, email, website, facebook, instagram, is_paid, is_featured, is_verified, status, hours)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19) RETURNING id
     `, [name, slug, category_id || null, short_description, description, address, city || 'Bristol', state || 'VT', zip || '05443', phone, email, website, facebook, instagram,
-        is_paid === 'on', is_featured === 'on', is_verified === 'on', status || 'active']);
+        is_paid === 'on', is_featured === 'on', is_verified === 'on', status || 'active', JSON.stringify(hours)]);
 
     // Fire N8N outreach webhook if listing has an email
     if (email && process.env.N8N_LISTING_WEBHOOK_URL) {
@@ -105,13 +119,14 @@ router.get('/edit/:id', requireAdmin, async (req, res, next) => {
 router.post('/edit/:id', requireAdmin, async (req, res, next) => {
   try {
     const { name, category_id, short_description, description, address, city, state, zip, phone, email, website, facebook, instagram, is_paid, is_featured, is_verified, status } = req.body;
+    const hours = parseHours(req.body);
     await db.query(`
       UPDATE listings SET name=$1, category_id=$2, short_description=$3, description=$4,
       address=$5, city=$6, state=$7, zip=$8, phone=$9, email=$10, website=$11,
       facebook=$12, instagram=$13, is_paid=$14, is_featured=$15, is_verified=$16,
-      status=$17, updated_at=NOW() WHERE id=$18
+      status=$17, hours=$18, updated_at=NOW() WHERE id=$19
     `, [name, category_id || null, short_description, description, address, city, state, zip, phone, email, website, facebook, instagram,
-        is_paid === 'on', is_featured === 'on', is_verified === 'on', status, req.params.id]);
+        is_paid === 'on', is_featured === 'on', is_verified === 'on', status, JSON.stringify(hours), req.params.id]);
     res.redirect('/admin?saved=1');
   } catch (err) { next(err); }
 });

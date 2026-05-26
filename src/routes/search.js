@@ -1,15 +1,25 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db/index');
+const { isOpenNow } = require('../utils/hours');
+
+// Reusable SQL fragment for "is open right now" based on JSONB hours column
+const OPEN_NOW_SQL = `
+  l.hours IS NOT NULL AND l.hours != '{}'::jsonb
+  AND ((l.hours->(TRIM(LOWER(TO_CHAR(NOW() AT TIME ZONE 'America/New_York', 'Day')))))->>'closed') = 'false'
+  AND TO_CHAR(NOW() AT TIME ZONE 'America/New_York', 'HH24:MI') >= ((l.hours->(TRIM(LOWER(TO_CHAR(NOW() AT TIME ZONE 'America/New_York', 'Day')))))->>'open')
+  AND TO_CHAR(NOW() AT TIME ZONE 'America/New_York', 'HH24:MI') <= ((l.hours->(TRIM(LOWER(TO_CHAR(NOW() AT TIME ZONE 'America/New_York', 'Day')))))->>'close')
+`;
 
 router.get('/', async (req, res, next) => {
   try {
-    const { q = '', category = '' } = req.query;
+    const { q = '', category = '', open_now = '' } = req.query;
     const params = [];
     let where = "WHERE l.status = 'active'";
 
     if (q) { params.push(`%${q}%`); where += ` AND (l.name ILIKE $${params.length} OR l.short_description ILIKE $${params.length} OR l.description ILIKE $${params.length})`; }
     if (category) { params.push(category); where += ` AND c.slug = $${params.length}`; }
+    if (open_now) { where += ` AND (${OPEN_NOW_SQL})`; }
 
     const { rows: listings } = await db.query(`
       SELECT l.*, c.name AS category_name, c.slug AS category_slug FROM listings l
@@ -17,11 +27,13 @@ router.get('/', async (req, res, next) => {
       ${where} ORDER BY l.is_featured DESC, l.is_paid DESC, l.name ASC
     `, params);
 
+    listings.forEach(l => { l.is_open_now = isOpenNow(l.hours); });
+
     const { rows: categories } = await db.query('SELECT * FROM categories ORDER BY sort_order');
 
     res.render('search', {
       title: q ? `"${q}" — Bristol Digital Direct` : 'Search — Bristol Digital Direct',
-      listings, categories, q, category
+      listings, categories, q, category, open_now: !!open_now
     });
   } catch (err) { next(err); }
 });

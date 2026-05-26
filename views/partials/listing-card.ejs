@@ -23,6 +23,11 @@
     <div class="dir-listing-meta">
       <span><i class="bi bi-geo-alt me-1"></i><%= listing.city %>, VT</span>
       <% if (listing.phone) { %><span><i class="bi bi-telephone me-1"></i><%= listing.phone %></span><% } %>
+      <% if (listing.is_open_now === true) { %>
+        <span style="color:#1a7a3c;font-weight:600"><i class="bi bi-circle-fill me-1" style="font-size:8px"></i>Open Now</span>
+      <% } else if (listing.is_open_now === false) { %>
+        <span style="color:#999"><i class="bi bi-circle me-1" style="font-size:8px"></i>Closed</span>
+      <% } %>
     </div>
   </div>
 </a>

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db/index');
+const { isOpenNow, todayName } = require('../utils/hours');
 
 router.get('/:slug', async (req, res, next) => {
   try {
@@ -10,7 +11,8 @@ router.get('/:slug', async (req, res, next) => {
       WHERE l.slug = $1 AND l.status = 'active'
     `, [req.params.slug]);
     if (!listing) return res.status(404).render('error', { title: 'Not Found', message: 'Listing not found.' });
-    res.render('listing', { title: listing.name + ' — Bristol Digital Direct', listing });
+    listing.is_open_now = isOpenNow(listing.hours);
+    res.render('listing', { title: listing.name + ' — Bristol Digital Direct', listing, today: todayName() });
   } catch (err) { next(err); }
 });
 

@@ -16,6 +16,10 @@
             <option value="<%= c.slug %>" <%= category === c.slug ? 'selected' : '' %>><%= c.name %></option>
           <% }) %>
         </select>
+        <label class="dir-filter-open-now d-flex align-items-center gap-2 mb-0" style="cursor:pointer;white-space:nowrap;font-weight:600;font-size:14px">
+          <input type="checkbox" name="open_now" value="1" <%= open_now ? 'checked' : '' %> style="width:16px;height:16px;accent-color:var(--green)">
+          <span><i class="bi bi-clock-fill me-1" style="color:var(--green)"></i>Open Now</span>
+        </label>
         <button type="submit" class="dir-filter-btn">Search</button>
       </div>
     </form>

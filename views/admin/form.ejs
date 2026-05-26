@@ -89,6 +89,35 @@
           </div>
         </div>
       </div>
+      <div class="admin-card mb-4">
+        <div class="admin-card-header"><h5 class="admin-card-title">Business Hours</h5></div>
+        <div class="p-4">
+          <table class="table table-sm mb-0" style="font-size:14px">
+            <thead>
+              <tr>
+                <th style="width:110px">Day</th>
+                <th>Opens</th>
+                <th>Closes</th>
+                <th class="text-center">Closed</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'].forEach(function(day) {
+                var dh = (listing && listing.hours && listing.hours[day]) ? listing.hours[day] : {};
+              %>
+              <tr>
+                <td class="align-middle fw-semibold"><%= day.charAt(0).toUpperCase() + day.slice(1) %></td>
+                <td><input type="time" name="hours_<%= day %>_open" class="form-control form-control-sm" value="<%= dh.open || '' %>" <%= dh.closed ? 'disabled' : '' %>></td>
+                <td><input type="time" name="hours_<%= day %>_close" class="form-control form-control-sm" value="<%= dh.close || '' %>" <%= dh.closed ? 'disabled' : '' %>></td>
+                <td class="text-center align-middle">
+                  <input type="checkbox" name="hours_<%= day %>_closed" class="form-check-input hours-closed-toggle" <%= dh.closed ? 'checked' : '' %>>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
     <div class="col-lg-4">
@@ -122,3 +151,12 @@
     </div>
   </div>
 </form>
+
+<script>
+document.querySelectorAll('.hours-closed-toggle').forEach(function(cb) {
+  cb.addEventListener('change', function() {
+    var row = this.closest('tr');
+    row.querySelectorAll('input[type="time"]').forEach(function(inp) { inp.disabled = cb.checked; });
+  });
+});
+</script>

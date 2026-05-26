@@ -65,6 +65,46 @@
             <span><i class="bi bi-geo-alt me-1 text-muted"></i><%= listing.address ? listing.address + ', ' : '' %><%= listing.city %>, <%= listing.state %> <%= listing.zip %></span>
           </div>
         </div>
+
+        <%
+          var hourDays = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+          var hrs = listing.hours || {};
+          var hasHours = hourDays.some(function(d) { return hrs[d] && (hrs[d].open || hrs[d].closed); });
+        %>
+        <% if (hasHours) { %>
+        <div class="dir-detail-card">
+          <div class="dir-detail-label d-flex align-items-center justify-content-between">
+            <span>Hours</span>
+            <% if (listing.is_open_now === true) { %>
+              <span class="badge bg-success" style="font-size:11px"><i class="bi bi-circle-fill me-1" style="font-size:8px"></i>Open Now</span>
+            <% } else if (listing.is_open_now === false) { %>
+              <span class="badge bg-danger" style="font-size:11px">Closed</span>
+            <% } %>
+          </div>
+          <table class="w-100" style="font-size:14px;margin-top:8px">
+            <% hourDays.forEach(function(day) {
+              var dh = hrs[day];
+              if (!dh) return;
+              var isToday = (day === today);
+            %>
+            <tr style="<%= isToday ? 'font-weight:700' : '' %>">
+              <td style="width:45%;padding:3px 0;color:<%= isToday ? 'var(--green)' : 'var(--text)' %>">
+                <%= day.charAt(0).toUpperCase() + day.slice(1) %>
+              </td>
+              <td style="padding:3px 0;color:var(--text-soft)">
+                <% if (dh.closed) { %>
+                  <span style="color:#999">Closed</span>
+                <% } else if (dh.open && dh.close) { %>
+                  <%= dh.open %> – <%= dh.close %>
+                <% } else { %>
+                  <span style="color:#ccc">—</span>
+                <% } %>
+              </td>
+            </tr>
+            <% }) %>
+          </table>
+        </div>
+        <% } %>
       </div>
     </div>
   </div>
